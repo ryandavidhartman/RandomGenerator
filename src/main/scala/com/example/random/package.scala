@@ -15,14 +15,14 @@ package object random {
     }
   }
 
-  val integerGenerator = new Generator[Int] {
+  val integerGenerator: Generator[Int] = new Generator[Int] {
     val rand = new java.util.Random
     override def generate: Int = rand.nextInt()
   }
 
-  val booleanGenerator = integerGenerator map (_ > 0)
+  val booleanGenerator: Generator[Boolean] = integerGenerator map (_ > 0)
 
-  def pairGenerator[T, U](t:Generator[T], u: Generator[U]) = for {
+  def pairGenerator[T, U](t:Generator[T], u: Generator[U]): Generator[(T, U)] = for {
     x <- t
     y <- u
   } yield (x, y)
@@ -36,7 +36,7 @@ package object random {
   } yield lo + x % (hi -lo)
 
   def oneOf[T](xs: T*): Generator[T] = for {
-    index <- integerGenerator(0, xs.length)
+    index <- integerRangeGenerator(0, xs.length)
   } yield xs(index)
 
 }
