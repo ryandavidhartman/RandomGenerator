@@ -18,6 +18,113 @@ class RandomSpecs extends WordSpec{
     }
   }
 
+  "The integerRangeGenerator" when {
+    "run" should {
+      "make random integers" in {
+        val test1 = integerRangeGenerator(0, 100).generate
+        assert(test1.isInstanceOf[Int])
+      }
+
+      "returns correct vales for a non-negative range" in {
+        val testGenerator = integerRangeGenerator(0, 100)
+        var gotLowEnd = false
+        var gotHighEnd = false
+
+        (1 to 1000) foreach(_ => {
+          val x = testGenerator.generate
+          assert(x>=0 && x < 100)
+          if(!gotLowEnd && x == 0) gotLowEnd = true
+          if(!gotHighEnd && x == 99) gotHighEnd = true
+        })
+
+        assert(gotLowEnd && gotHighEnd)
+      }
+
+      "return for ranges that are negative" in {
+        val testGenerator = integerRangeGenerator(-100, -50)
+        var gotLowEnd = false
+        var gotHighEnd = false
+
+        (1 to 1000) foreach(_ => {
+          val x = testGenerator.generate
+          assert(x >= -100 && x < -50)
+          if(!gotLowEnd && x == -100) gotLowEnd = true
+          if(!gotHighEnd && x == -51) gotHighEnd = true
+        })
+
+        assert(gotLowEnd && gotHighEnd)
+      }
+
+      "return for ranges span zero" in {
+        val testGenerator = integerRangeGenerator(-100, 100)
+        var gotLowEnd = false
+        var gotHighEnd = false
+
+        (1 to 1000) foreach(_ => {
+          val x = testGenerator.generate
+          assert(x >= -100 && x < 100)
+          if(!gotLowEnd && x == -100) gotLowEnd = true
+          if(!gotHighEnd && x == 99) gotHighEnd = true
+        })
+
+        assert(gotLowEnd && gotHighEnd)
+      }
+
+      "blows up for an invalid range" in {
+        assertThrows[IllegalArgumentException]{
+          integerRangeGenerator(100, 10)
+        }
+      }
+    }
+  }
+
+  "The doubleGenerator" when {
+    "run" should {
+      "make random doubles" in {
+        val test1 = doubleGenerator.generate
+        assert(test1.isInstanceOf[Double])
+      }
+
+      "not return the same in every time" in {
+        val test1 = doubleGenerator.generate
+        val test2 = doubleGenerator.generate
+        assert(test1 != test2)
+      }
+    }
+  }
+
+  "The charGenerator" when {
+    "run" should {
+      "make random characters" in {
+        val test1 = charGenerator.generate
+        assert(test1.isInstanceOf[Char])
+      }
+
+      "not return the same in every time" in {
+        val testChars = Set(charGenerator.generate, charGenerator.generate, charGenerator.generate, charGenerator.generate)
+        // of the  4 runs we can normally expect at least two  different characters
+        assert(testChars.size > 1 )
+      }
+    }
+  }
+
+  "The stringGenerator" when {
+    "run" should {
+      "make random strings" in {
+        val test1 = stringGenerator.generate
+        assert(test1.isInstanceOf[String])
+      }
+
+      "not return the same in every time" in {
+        val testString1 = stringGenerator.generate
+        assert(testString1.length >= 0 && testString1.length <= 50)
+        val testString2 = stringGenerator.generate
+        assert(testString2.length >= 0 && testString2.length <= 50)
+        assert(testString1 != testString2)
+      }
+    }
+  }
+
   "The booleanGenerator" when {
     "run" should {
       "make random booleans" in {
@@ -63,39 +170,6 @@ class RandomSpecs extends WordSpec{
         val test1 = single(sentinelValue).generate
         assert(test1.isInstanceOf[Int])
         assert(test1 === sentinelValue)
-      }
-    }
-  }
-
-  "The integerRangeGenerator" when {
-    "run" should {
-      "make random integers" in {
-        val test1 = integerRangeGenerator(0, 100).generate
-        assert(test1.isInstanceOf[Int])
-      }
-
-      "return for ranges that are non-negative" in {
-        val test1 = integerRangeGenerator(0, 100).generate
-        val test2 = integerRangeGenerator(100, 150).generate
-
-        assert(test1 >= 0 && test1 <= 100)
-        assert(test2 >= 100 && test2 <= 150)
-        assert(test1 != test2)
-      }
-
-      "return for ranges that are negative" in {
-        val test1 = integerRangeGenerator(-100, 0).generate
-        val test2 = integerRangeGenerator(-150, -100).generate
-
-        assert(test1 >= -100 && test1 <= 0)
-        assert(test2 >= -150 && test2 <= -100)
-        assert(test1 != test2)
-      }
-
-      "blows up for an invalid range" in {
-        assertThrows[IllegalArgumentException]{
-          integerRangeGenerator(100, 10)
-        }
       }
     }
   }

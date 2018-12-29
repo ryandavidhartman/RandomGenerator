@@ -21,6 +21,37 @@ package object random {
     override def generate: Int = rand.nextInt()
   }
 
+  def integerRangeGenerator(low: Int, high: Int): Generator[Int] = {
+    require(high > low)
+    for {
+      x <- integerGenerator
+    } yield (1.0*Math.abs(x)*(high-low)/2147483648.0).toInt + low
+  }
+
+  val  doubleGenerator: Generator[Double] = new Generator[Double] {
+    val rand = new java.util.Random
+    override def generate: Double = rand.nextDouble()
+  }
+
+  val charGenerator: Generator[Char] = new Generator[Char] {
+    override def generate: Char = {
+      val leftLimit = 97 // letter 'a'
+      val rightLimit = 122 // letter 'z'
+      integerRangeGenerator(leftLimit, rightLimit).generate.toChar
+    }
+  }
+
+  val stringGenerator: Generator[String] = new Generator[String] {
+    override def generate: String = {
+      val targetStringLength = integerRangeGenerator(0, 50).generate
+      val buffer = new StringBuilder(targetStringLength)
+      (0 to targetStringLength) foreach { _ =>
+        buffer.append(charGenerator.generate)
+      }
+      buffer.toString
+    }
+  }
+
   val booleanGenerator: Generator[Boolean] = integerGenerator map (_ > 0)
 
   def pairGenerator[T, U](t: Generator[T], u: Generator[U]): Generator[(T, U)] = for {
@@ -31,13 +62,6 @@ package object random {
   def single[T](x: T): Generator[T] = new Generator[T] {
     override def generate: T = x
   }
-
-  def integerRangeGenerator(low: Int, high: Int): Generator[Int] = {
-    require(high > low)
-    for {
-      x <- integerGenerator
-    } yield (x*(high-low)/2147483648.0).toInt + low + 1
- }
 
   def oneOfGenerator[T](xs: T*): Generator[Any] = for {
     index <- integerRangeGenerator(0, xs.length)
