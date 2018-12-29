@@ -17,25 +17,29 @@ package object random {
 
   val integerGenerator: Generator[Int] = new Generator[Int] {
     val rand = new java.util.Random
+
     override def generate: Int = rand.nextInt()
   }
 
   val booleanGenerator: Generator[Boolean] = integerGenerator map (_ > 0)
 
-  def pairGenerator[T, U](t:Generator[T], u: Generator[U]): Generator[(T, U)] = for {
+  def pairGenerator[T, U](t: Generator[T], u: Generator[U]): Generator[(T, U)] = for {
     x <- t
     y <- u
   } yield (x, y)
 
-  def single[T](x:T): Generator[T] = new Generator[T] {
+  def single[T](x: T): Generator[T] = new Generator[T] {
     override def generate: T = x
   }
 
-  def integerRangeGenerator(lo: Int, hi: Int): Generator[Int] = for {
-    x <- integerGenerator
-  } yield lo + x % (hi -lo)
+  def integerRangeGenerator(low: Int, high: Int): Generator[Int] = {
+    require(high > low)
+    for {
+      x <- integerGenerator
+    } yield (x*(high-low)/2147483648.0).toInt + low + 1
+ }
 
-  def oneOf[T](xs: T*): Generator[T] = for {
+  def oneOfGenerator[T](xs: T*): Generator[Any] = for {
     index <- integerRangeGenerator(0, xs.length)
   } yield xs(index)
 
