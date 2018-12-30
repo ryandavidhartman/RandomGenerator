@@ -67,4 +67,16 @@ package object random {
     index <- integerRangeGenerator(0, xs.length)
   } yield xs(index)
 
+  def emptyListGenerator: Generator[Nil.type] = single(Nil)
+
+  def nonEmptyListGenerator[T](t: Generator[T]):  Generator[List[T]] = for {
+    head <- t
+    tail <- listGenerator(t)
+  } yield head :: tail
+
+  def listGenerator[T](t: Generator[T]): Generator[List[T]] = for {
+    isEmpty <- booleanGenerator
+    list <- if(isEmpty) emptyListGenerator else nonEmptyListGenerator(t)
+  } yield list
+
 }

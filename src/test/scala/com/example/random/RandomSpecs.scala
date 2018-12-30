@@ -189,4 +189,35 @@ class RandomSpecs extends WordSpec{
 
     }
   }
+
+  "The listGenerator" when {
+    "run" should {
+      "returns a correct type" in {
+        val test1 = listGenerator(integerGenerator).generate
+        assert(test1.isInstanceOf[List[Int]])
+      }
+
+      "not return the same in every time" in {
+
+        var nonEmtpyListCount = 0
+        var emtpyListCount = 0
+        val testGenerator = listGenerator(integerGenerator)
+
+        (1 to 100) foreach{ _ =>
+          val x  = testGenerator.generate
+          if(x.isEmpty)
+            emtpyListCount += 1
+          else {
+            nonEmtpyListCount += 1
+            assert(x.head.isInstanceOf[Int])
+          }
+        }
+
+        assert(nonEmtpyListCount >= 40)
+        assert(nonEmtpyListCount + emtpyListCount == 100)
+      }
+
+    }
+  }
+
 }
