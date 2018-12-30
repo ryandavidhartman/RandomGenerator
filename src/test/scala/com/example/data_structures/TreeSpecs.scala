@@ -28,9 +28,6 @@ class TreeSpecs extends WordSpec{
             leafCount += 1
           }
         }
-
-
-
         assert(leafCount >= 40)
         assert(leafCount + innerCount == 100)
       }
