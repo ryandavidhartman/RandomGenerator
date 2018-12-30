@@ -9,11 +9,9 @@ class RandomSpecs extends WordSpec{
         val test1 = integerGenerator.generate
         assert(test1.isInstanceOf[Int])
       }
-
       "not return the same in every time" in {
-        val test1 = integerGenerator.generate
-        val test2 = integerGenerator.generate
-        assert(test1 != test2)
+        val testVal = integerGenerator.generate
+        test[Int](integerGenerator, 100)(x => x != testVal)
       }
     }
   }
@@ -25,47 +23,52 @@ class RandomSpecs extends WordSpec{
         assert(test1.isInstanceOf[Int])
       }
 
-      "returns correct vales for a non-negative range" in {
+      "returns values in the correct range" in {
+        test(integerRangeGenerator(0, 100))(x =>  x>= 0 && x < 100)
+        test(integerRangeGenerator(-10, 20))(x => x >= -10 && x < 20)
+        test(integerRangeGenerator(100, 300))(x => x >= 100 && x < 300)
+        test(integerRangeGenerator(-100, 100))(x => x >= -100 && x < 100)
+      }
+
+      "covers the range for a non-negative range" in {
         val testGenerator = integerRangeGenerator(0, 100)
         var gotLowEnd = false
         var gotHighEnd = false
 
-        (1 to 1000) foreach(_ => {
+        for ( _ <- 1 to 1000) {
           val x = testGenerator.generate
           assert(x>=0 && x < 100)
           if(!gotLowEnd && x == 0) gotLowEnd = true
           if(!gotHighEnd && x == 99) gotHighEnd = true
-        })
-
+        }
         assert(gotLowEnd && gotHighEnd)
       }
 
-      "return for ranges that are negative" in {
+      "covers the range for a negative range" in {
         val testGenerator = integerRangeGenerator(-100, -50)
         var gotLowEnd = false
         var gotHighEnd = false
 
-        (1 to 1000) foreach(_ => {
+        for (_ <- 1 to 1000) {
           val x = testGenerator.generate
           assert(x >= -100 && x < -50)
           if(!gotLowEnd && x == -100) gotLowEnd = true
           if(!gotHighEnd && x == -51) gotHighEnd = true
-        })
-
+        }
         assert(gotLowEnd && gotHighEnd)
       }
 
-      "return for ranges span zero" in {
+      "covers the range return for ranges that span zero" in {
         val testGenerator = integerRangeGenerator(-100, 100)
         var gotLowEnd = false
         var gotHighEnd = false
 
-        (1 to 1000) foreach(_ => {
+        for(_ <- 1 to 1000) {
           val x = testGenerator.generate
           assert(x >= -100 && x < 100)
           if(!gotLowEnd && x == -100) gotLowEnd = true
           if(!gotHighEnd && x == 99) gotHighEnd = true
-        })
+        }
 
         assert(gotLowEnd && gotHighEnd)
       }
@@ -203,7 +206,7 @@ class RandomSpecs extends WordSpec{
         var emtpyListCount = 0
         val testGenerator = listGenerator(integerGenerator)
 
-        (1 to 100) foreach{ _ =>
+        for (_ <- 1 to 100) {
           val x  = testGenerator.generate
           if(x.isEmpty)
             emtpyListCount += 1
@@ -219,5 +222,13 @@ class RandomSpecs extends WordSpec{
 
     }
   }
+
+  def test[T](g: Generator[T], numTimes: Int = 100)(test: T => Boolean): Unit = {
+    for(_ <- 0 until numTimes) {
+      val  value = g.generate
+      assert(test(value), "Test failed for " + value)
+    }
+  }
+
 
 }
